@@ -39,7 +39,7 @@ function nobyda() {
 	const isLoon = typeof($loon) !== "undefined" && $loon > 289;
 	const isQuanX = typeof($configuration) !== 'undefined';
 	const isSurge = typeof($httpAPI) !== 'undefined';
-	const m = `不支持您的APP版本, 请等待APP更新 ⚠️`;
+	const m = $loon;
 	this.getGroup = () => {
 		if (isSurge) {
 			return new Promise((resolve) => {
