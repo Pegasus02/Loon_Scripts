@@ -1,3 +1,11 @@
+#!name=Bilibili_Auto_Regions
+#!desc=哔哩哔哩自动换区，同时显示港澳台
+#!author=Pegasus02
+#!homepage=https://github.com/Pegasus02/Loon_Scripts
+#!openUrl=http://boxjs.com/#/app/BiliRegion/
+#!icon=https://github.com/Pegasus02/Loon_Scripts/blob/main/Icons/bilibiliicon.jpg
+
+
 [Script]
 http-response ^https:\/\/ap(p|i)\.bili(bili|api)\.(com|net)\/(pgc\/view\/v\d\/app\/season|x\/offline\/version)\? script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/Bili_Auto_Regions.js, requires-body=true, tag=bili自动地区
 #可选, 适用于搜索指定地区的番剧
