@@ -7,7 +7,6 @@
 
 
 [Script]
-^https?:\/\/i.\.hdslb\.com\/bfs\/subtitle\/.+\.json$ url script-response-body
-script-path = https://ocd0552.tk/ddgksf2013/Cuttlefish/raw/branch/master/Script/bilibili_cc.js
+^https?:\/\/i.\.hdslb\.com\/bfs\/subtitle\/.+\.json$ url script-response-body https://ocd0522.tk/ddgksf2013/Cuttlefish/raw/branch/master/Script/bilibili_cc.js
 [Mitm]
 hostname = *.hdslb.com
