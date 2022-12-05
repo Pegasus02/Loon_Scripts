@@ -1,0 +1,6 @@
+#!name:epic周免
+#!author=Pegasus02
+#!homepage=https://github.com/Pegasus02/Loon_Scripts
+
+[Script]
+cron "55 23 ? * THU" script-path=https://raw.githubusercontent.com/Peng-YM/QuanX/master/Tasks/epic.js
