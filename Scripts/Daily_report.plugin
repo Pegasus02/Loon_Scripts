@@ -1,0 +1,6 @@
+#!name=Daily Report
+#!desc=每日简报
+#!author=Pegasus02
+#!homepage=https://github.com/Pegasus02/Loon_Scripts
+
+cron "0 9 * * *" script-path=https://github.com/ddgksf2013/Scripts/raw/master/60s.js, tag=每天60s读懂世界
