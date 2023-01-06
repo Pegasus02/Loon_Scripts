@@ -50,7 +50,7 @@
 let url = $request.url
 let headers = $request.headers
 
-let default_settings = {
+let settings = {
     Disney: {
         type: "Official", // Official, Google, DeepL, External, Disable
         lang: "English [CC]",
@@ -104,7 +104,7 @@ let default_settings = {
         lang: "English",
         sl: "auto",
         tl: "en",
-        line: "f", // f, s
+        line: "s", // f, s
         dkey: "null", // DeepL API key
         s_subtitles_url: "null",
         t_subtitles_url: "null",
@@ -153,7 +153,7 @@ let default_settings = {
         lang: "English",
         sl: "auto",
         tl: "en",
-        line: "f", // f, s
+        line: "s", // f, s
         dkey: "null", // DeepL API key
         s_subtitles_url: "null",
         t_subtitles_url: "null",
@@ -173,32 +173,9 @@ let default_settings = {
     }
 }
 
-let settings = $persistentStore.read()
-
-if (!settings) settings = default_settings
-
 if (typeof (settings) == "string") settings = JSON.parse(settings)
 
-let service = ""
-if (url.match(/(dss|star)ott.com/)) service = "Disney"
-if (url.match(/hbo(maxcdn)*.com/)) service = "HBOMax"
-if (url.match(/huluim.com/)) service = "Hulu"
-if (url.match(/nflxvideo.net/)) service = "Netflix"
-if (url.match(/cbs(aa|i)video.com/)) service = "Paramount"
-if (url.match(/(cloudfront|akamaihd|avi-cdn).net/)) service = "PrimeVideo"
-if (url.match(/general.media/)) service = "General"
-if (url.match(/youtube.com/)) service = "YouTube"
-
-if (settings.General) {
-    let general_service = settings.General.service.split(", ")
-    for (var s in general_service) {
-        let patt = new RegExp(general_service[s])
-        if (url.match(patt)) {
-            service = "General"
-            break
-        }
-    }
-}
+let service = "Netflix"
 
 if (!service) $done({})
 
@@ -240,108 +217,14 @@ if (url.match(/action=set/)) {
 
 if (setting.type == "Disable") $done({})
 
-if (setting.type != "Official" && url.match(/\.m3u8/)) $done({})
-
 let body = $response.body
 
 if (!body) $done({})
 
-if (service == "YouTube") {
-
-    let patt = new RegExp(`lang=${setting.tl}`)
-
-    if (url.replace(/&lang=zh(-Hans)*&/, "&lang=zh-CN&").replace(/&lang=zh-Hant&/, "&lang=zh-TW&").match(patt) || url.match(/&tlang=/)) $done({})
-
-    let t_url = `${url}&tlang=${setting.tl == "zh-CN" ? "zh-Hans" : setting.tl == "zh-TW" ? "zh-Hant" : setting.tl}`
-
-    let options = {
-        url: t_url,
-        headers: headers
-    }
-
-    $httpClient.get(options, function (error, response, data) {
-
-        if (setting.line == "sl") $done({ body: data })
-        let timeline = body.match(/<p t="\d+" d="\d+">/g)
-
-        if (url.match(/&kind=asr/)) {
-            body = body.replace(/<\/?s[^>]*>/g, "")
-            data = data.replace(/<\/?s[^>]*>/g, "")
-            timeline = body.match(/<p t="\d+" d="\d+"[^>]+>/g)
-        }
-
-        for (var i in timeline) {
-            let patt = new RegExp(`${timeline[i]}([^<]+)<\\/p>`)
-            if (body.match(patt) && data.match(patt)) {
-                if (setting.line == "s") body = body.replace(patt, `${timeline[i]}$1\n${data.match(patt)[1]}</p>`)
-                if (setting.line == "f") body = body.replace(patt, `${timeline[i]}${data.match(patt)[1]}\n$1</p>`)
-            }
-        }
-
-        $done({ body })
-
-    })
-
-}
-
 let subtitles_urls_data = setting.t_subtitles_url
 
-if (setting.type == "Official" && url.match(/\.m3u8/)) {
-    settings[service].t_subtitles_url = "null"
-    $persistentStore.write(JSON.stringify(settings))
-
-    let patt = new RegExp(`TYPE=SUBTITLES.+NAME="${setting.tl.replace(/(\[|\]|\(|\))/g, "\\$1")}.+URI="([^"]+)`)
-
-    if (body.match(patt)) {
-
-        let host = ""
-        if (service == "Disney") host = url.match(/https.+media.(dss|star)ott.com\/ps01\/disney\/[^\/]+\//)[0]
-
-        let subtitles_data_link = `${host}${body.match(patt)[1]}`
-
-        if (service == "PrimeVideo") {
-            correct_host = subtitles_data_link.match(/https:\/\/(.+(cloudfront|akamaihd|avi-cdn).net)/)[1]
-            headers.Host = correct_host
-        }
-
-        let options = {
-            url: subtitles_data_link,
-            headers: headers
-        }
-
-        $httpClient.get(options, function (error, response, data) {
-            let subtitles_data = ""
-            if (service == "Disney") subtitles_data = data.match(/.+-MAIN.+\.vtt/g)
-            if (service == "HBOMax") subtitles_data = data.match(/http.+\.vtt/g)
-            if (service == "PrimeVideo") subtitles_data = data.match(/.+\.vtt/g)
-
-            if (service == "Disney") host = host + "r/"
-            if (service == "PrimeVideo") host = subtitles_data_link.match(/https.+\//)[0]
-
-            if (subtitles_data) {
-                subtitles_data = subtitles_data.join("\n")
-                if (service == "Disney" || service == "PrimeVideo") subtitles_data = subtitles_data.replace(/(.+)/g, `${host}$1`)
-                settings[service].t_subtitles_url = subtitles_data
-                $persistentStore.write(JSON.stringify(settings))
-            }
-
-            if (service == "Disney" && subtitles_data_link.match(/.+-MAIN.+/) && data.match(/,\nseg.+\.vtt/g)) {
-                subtitles_data = data.match(/,\nseg.+\.vtt/g)
-                let url_path = subtitles_data_link.match(/\/r\/(.+)/)[1].replace(/\w+\.m3u8/, "")
-                settings[service].t_subtitles_url = subtitles_data.join("\n").replace(/,\n/g, hots + url_path)
-                $persistentStore.write(JSON.stringify(settings))
-            }
-
-            $done({})
-        })
-
-    }
-
-    if (!body.match(patt)) $done({})
-}
 
 if (url.match(/\.(web)?vtt/) || service == "Netflix" || service == "General") {
-    if (service != "Netflix" && url == setting.s_subtitles_url && setting.subtitles != "null" && setting.subtitles_type == setting.type && setting.subtitles_sl == setting.sl && setting.subtitles_tl == setting.tl && setting.subtitles_line == setting.line) $done({ body: setting.subtitles })
 
     if (setting.type == "Official") {
         if (subtitles_urls_data == "null") $done({})
@@ -373,7 +256,7 @@ async function machine_subtitles(type) {
 
     let dialogue = body.match(/\d+:\d\d:\d\d.\d\d\d --> \d+:\d\d:\d\d.\d.+\n.+/g)
 
-    if (!dialogue) $done({})
+    if (!dialogue || dialogue.match([\u4e00-\u9fa5])) $done({})
 
     let timeline = body.match(/\d+:\d\d:\d\d.\d\d\d --> \d+:\d\d:\d\d.\d.+/g)
 
