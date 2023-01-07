@@ -84,7 +84,7 @@ http-response ^https?:\/\/(.+)\.cssott\.com\/(.+)\/mpeg_cbcs\/master_manifest_(.
 http-response ^https?:\/\/(.+)\.cssott\.com\/(.+)\/mpeg_cbcs\/(.+)\/(.+)\.subtitles\.\d+\.m3u8(\?.*dualsubs=\w+)?$, requires-body=1, max-size=0, timeout=30, script-path=https://raw.githubusercontent.com/DualSubs/DualSubs/main/js/DualSubs.HLS.WebVTT.m3u8.js, tag=DualSubs.SkyShowtime.HLS.WebVTT.m3u8
 http-response ^https?:\/\/(.+)\.cssott\.com\/(.+)\/mpeg_cbcs\/(.+)\/(.+)\.subtitles\.\d+\.split\.\d+\.webvtt(\?.*dualsubs=\w+)$, requires-body=1, max-size=0, timeout=30, script-path=https://raw.githubusercontent.com/DualSubs/DualSubs/main/js/DualSubs.SUB.WebVTT.js, tag=DualSubs.SkyShowtime.SUB.WebVTT
 
-http-response ^https:\/\/.+nflxvideo.net\/\?o=\d+&v=\d+&e=.+ script-path=https://raw.githubusercontent.com/Neurogram-R/Surge/master/Dualsub.js,requires-body=1,max-size=0,timeout=30, tag=Dualsub 
+http-response ^https:\/\/.+nflxvideo.net\/\?o=\d+&v=\d+&e=.+ script-path=https://raw.githubusercontent.com/DualSubs/DualSubs/main/js/DualSubs.HLS.Main.m3u8.js,requires-body=1,max-size=0,timeout=30, tag=Dualsub 
 http-request ^https:\/\/setting.nflxvideo.net\/\?action=(g|s)et script-path=https://raw.githubusercontent.com/Neurogram-R/Surge/master/Dualsub.js,requires-body=1,max-size=0,timeout=30, tag=Dualsub 
 
 [MITM]
